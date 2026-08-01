@@ -11,8 +11,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-
-# ---------- Shared-style CSS (mirrors other pages) ----------
 st.markdown("""
 <style>
     .block-container {
@@ -76,7 +74,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- Load data ----------
+
 new_df = pd.read_csv('datasets/data_viz1.csv')
 
 with open('datasets/sector_feature_text.pkl', 'rb') as f:
@@ -84,7 +82,6 @@ with open('datasets/sector_feature_text.pkl', 'rb') as f:
 
 group_df = new_df.groupby('sector')[['price', 'price_per_sqft', 'built_up_area', 'latitude', 'longitude']].mean()
 
-# ---------- Header ----------
 st.title("Real Estate Analytics")
 st.caption("Explore pricing trends, sector-level features, and property distributions across the market.")
 
@@ -94,7 +91,6 @@ st.caption("Explore pricing trends, sector-level features, and property distribu
     "Distribution", "Furnishing Impact", "Luxury Impact", "What Drives Price", "Top Sectors"
 ])
 
-# ---------- Tab 1: Geomap ----------
 with tab_map:
     st.markdown('<p class="section-label">Sector Price per Sqft Geomap</p>', unsafe_allow_html=True)
     st.markdown('<p class="section-sub">Bubble size reflects average built-up area; color reflects average price per sqft.</p>', unsafe_allow_html=True)
@@ -107,7 +103,6 @@ with tab_map:
     fig.update_layout(margin=dict(l=0, r=0, t=10, b=0))
     st.plotly_chart(fig, use_container_width=True)
 
-# ---------- Tab 2: Wordcloud ----------
 with tab_words:
     st.markdown('<p class="section-label">Features Wordcloud</p>', unsafe_allow_html=True)
     st.markdown('<p class="section-sub">Most commonly mentioned amenities and features, by sector.</p>', unsafe_allow_html=True)
@@ -130,7 +125,6 @@ with tab_words:
     else:
         st.warning(f"No feature data available for {selected_sector}")
 
-# ---------- Tab 3: Area vs Price ----------
 with tab_area:
     st.markdown('<p class="section-label">Area vs Price</p>', unsafe_allow_html=True)
     st.markdown('<p class="section-sub">Relationship between built-up area and price, colored by bedroom count.</p>', unsafe_allow_html=True)
@@ -144,7 +138,6 @@ with tab_area:
     )
     st.plotly_chart(fig1, use_container_width=True)
 
-# ---------- Tab 4: BHK Pie ----------
 with tab_bhk:
     st.markdown('<p class="section-label">BHK Distribution</p>', unsafe_allow_html=True)
     st.markdown('<p class="section-sub">Share of listings by number of bedrooms.</p>', unsafe_allow_html=True)
@@ -160,7 +153,6 @@ with tab_bhk:
 
     st.plotly_chart(fig2, use_container_width=True)
 
-# ---------- Tab 5: BHK Price Range ----------
 with tab_range:
     st.markdown('<p class="section-label">Side-by-Side BHK Price Comparison</p>', unsafe_allow_html=True)
     st.markdown('<p class="section-sub">Price spread across 1-4 BHK configurations.</p>', unsafe_allow_html=True)
@@ -168,7 +160,6 @@ with tab_range:
     fig3 = px.box(new_df[new_df['bedRoom'] <= 4], x='bedRoom', y='price', height=550)
     st.plotly_chart(fig3, use_container_width=True)
 
-# ---------- Tab 6: Distribution ----------
 with tab_dist:
     st.markdown('<p class="section-label">Price Distribution by Property Type</p>', unsafe_allow_html=True)
     st.markdown('<p class="section-sub">How house and flat prices are distributed across the market.</p>', unsafe_allow_html=True)
@@ -181,7 +172,7 @@ with tab_dist:
     ax.legend()
     st.pyplot(fig4)
 
-# ---------- Tab 7: Furnishing Impact ----------
+#
 with tab_furnish:
     st.markdown('<p class="section-label">Does Furnishing Affect Price?</p>', unsafe_allow_html=True)
     st.markdown('<p class="section-sub">Price spread for unfurnished, semi-furnished, and furnished properties.</p>', unsafe_allow_html=True)
@@ -198,7 +189,6 @@ with tab_furnish:
     fig5.update_layout(showlegend=False, xaxis_title=" ", yaxis_title="Price (Cr)")
     st.plotly_chart(fig5, use_container_width=True)
 
-# ---------- Tab 8: Luxury Impact ----------
 with tab_luxury:
     st.markdown('<p class="section-label">Does Luxury Tier Affect Price?</p>', unsafe_allow_html=True)
     st.markdown('<p class="section-sub">Average price and price per sqft across luxury categories.</p>', unsafe_allow_html=True)
@@ -215,7 +205,6 @@ with tab_luxury:
         fig6b.update_layout(showlegend=False, xaxis_title="Luxury Category", yaxis_title="Avg Price/Sqft")
         st.plotly_chart(fig6b, use_container_width=True)
 
-# ---------- Tab 9: Correlation Heatmap ----------
 with tab_corr:
     st.markdown('<p class="section-label">What Drives Price?</p>', unsafe_allow_html=True)
     st.markdown('<p class="section-sub">Correlation between price and other numeric property attributes. Values closer to 1 or -1 indicate a stronger relationship.</p>', unsafe_allow_html=True)
@@ -228,7 +217,6 @@ with tab_corr:
     sns.heatmap(corr, annot=True, fmt=".2f", cmap="rocket_r", ax=ax, cbar_kws={'label': 'Correlation'})
     st.pyplot(fig7)
 
-# ---------- Tab 10: Top Sectors ----------
 with tab_sectors:
     st.markdown('<p class="section-label">Top Sectors by Average Price</p>', unsafe_allow_html=True)
     st.markdown('<p class="section-sub">The highest-priced sectors on average, useful for spotting premium micro-markets.</p>', unsafe_allow_html=True)

@@ -6,10 +6,8 @@ import numpy as np
 st.set_page_config(
     page_title="Flat Price Predictor",
     layout="centered",
-    initial_sidebar_state="expanded",   # <-- was "collapsed", now matches app.py
+    initial_sidebar_state="expanded",  
 )
-
-# ---------- Light custom CSS (small, targeted tweaks only) ----------
 st.markdown("""
 <style>
     /* Tighten the default top padding */
@@ -64,21 +62,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- Load artifacts ----------
+
 with open('df.pkl', 'rb') as file:
     df = pickle.load(file)
 
 with open('pipeline.pkl', 'rb') as file:
     pipeline = pickle.load(file)
 
-# ---------- Header ----------
 st.title("Flat & House Price Predictor")
 st.caption("Fill in the property details below to get an estimated price range.")
 
-# Placeholder reserved right under the header. We fill this in later in the
-# script (after the button logic runs), but because it's an st.empty() slot
-# created here, the content appears at THIS position on the page -- no
-# scrolling needed to see the result after clicking Predict.
 result_slot = st.empty()
 
 # If a prediction already exists in session_state (e.g. user tweaked an
@@ -93,7 +86,6 @@ if "last_prediction" in st.session_state:
         </div>
         """, unsafe_allow_html=True)
 
-# ---------- Inputs, grouped into cards ----------
 with st.container(border=True):
     st.markdown('<p class="section-label">Basic details</p>', unsafe_allow_html=True)
     c1, c2 = st.columns(2)
@@ -132,7 +124,6 @@ with st.container(border=True):
 
 st.write("")
 
-# ---------- Predict ----------
 predict_clicked = st.button('Predict Price', type="primary")
 
 if predict_clicked:
@@ -146,21 +137,11 @@ if predict_clicked:
     one_df = pd.DataFrame(data, columns=columns)
 
     with st.spinner("Estimating price..."):
-        # Cast to native Python float right away -- numpy.float64 is what
-        # was causing the ugly "0.119999997317790..." display, because
-        # round() on a numpy float doesn't collapse binary floating-point
-        # tails the way it does on a native Python float.
         base_price = float(np.expm1(pipeline.predict(one_df))[0])
         low = base_price - 0.22
         high = base_price + 0.22
-
-    # Store in session_state so the result persists across reruns
-    # (e.g. if the user changes another input afterwards) and so the
-    # top-of-page placeholder logic above can pick it up.
     st.session_state["last_prediction"] = (low, high)
 
-    # Fill the placeholder reserved at the top of the page -- this is what
-    # makes the result visible immediately without scrolling.
     with result_slot.container():
         st.markdown(f"""
         <div class="result-card">

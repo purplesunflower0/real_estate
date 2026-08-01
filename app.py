@@ -7,7 +7,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ---------- Shared-style CSS (mirrors other pages) ----------
 st.markdown("""
 <style>
     .block-container {
@@ -72,7 +71,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- Hero ----------
 st.markdown('<div class="hero-title"> Gurgaon Real Estate Analytics</div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="hero-sub">Explore pricing trends, predict property values, and discover apartments '
@@ -80,7 +78,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------- Feature cards ----------
 with st.container(border=True):
     st.markdown('<div class="feature-icon"></div>', unsafe_allow_html=True)
     st.markdown('<div class="feature-title">Analytics</div>', unsafe_allow_html=True)

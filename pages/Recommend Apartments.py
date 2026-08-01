@@ -9,7 +9,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",   # consistent with other pages
 )
 
-# ---------- Shared-style CSS (mirrors Predict Price page) ----------
 st.markdown("""
 <style>
     .block-container {
@@ -135,7 +134,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- Load artifacts ----------
+
 location_df_clean = pickle.load(open('datasets/location_distance.pkl', 'rb'))
 cosine_sim1 = pickle.load(open('datasets/cosine_sim1.pkl', 'rb'))
 cosine_sim2 = pickle.load(open('datasets/cosine_sim2.pkl', 'rb'))
@@ -160,11 +159,9 @@ def recommend_properties_with_scores(property_name, top_n=5):
     return recommendations_df
 
 
-# ---------- Header ----------
 st.title("Recommend Apartments")
 st.caption("Search apartments near a location, or find similar properties to one you already like.")
 
-# ---------- Section 1: Location + radius search ----------
 with st.container(border=True):
     st.markdown('<p class="section-label">Find properties near a location</p>', unsafe_allow_html=True)
     st.markdown('<p class="section-sub">Pick a landmark or sector and a search radius to see nearby listed properties.</p>', unsafe_allow_html=True)
@@ -197,7 +194,7 @@ with st.container(border=True):
 
 st.write("")
 
-# ---------- Section 2: Similar apartment recommendations ----------
+
 with st.container(border=True):
     st.markdown('<p class="section-label">Find similar apartments</p>', unsafe_allow_html=True)
     st.markdown('<p class="section-sub">Choose an apartment and get the top matches based on amenities, pricing, and location similarity.</p>', unsafe_allow_html=True)
