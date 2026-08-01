@@ -6,7 +6,7 @@ import numpy as np
 st.set_page_config(
     page_title="Flat Price Predictor",
     layout="centered",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded",   # <-- was "collapsed", now matches app.py
 )
 
 # ---------- Light custom CSS (small, targeted tweaks only) ----------
@@ -35,11 +35,31 @@ st.markdown("""
 
     /* Section subheaders */
     .section-label {
-        font-size: 0.95rem;
+        font-size: 24px;
         font-weight: 600;
         color: #374151;
         margin-top: 0.5rem;
         margin-bottom: 0.25rem;
+    }
+
+    /* Result card */
+    .result-card {
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+        border: 1px solid #a7f3d0;
+        border-radius: 14px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .result-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #065f46;
+        margin-bottom: 0.5rem;
+    }
+    .result-range {
+        font-size: 28px;
+        font-weight: 700;
+        color: #064e3b;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -52,8 +72,26 @@ with open('pipeline.pkl', 'rb') as file:
     pipeline = pickle.load(file)
 
 # ---------- Header ----------
-st.title("🏠 Flat & House Price Predictor")
+st.title("Flat & House Price Predictor")
 st.caption("Fill in the property details below to get an estimated price range.")
+
+# Placeholder reserved right under the header. We fill this in later in the
+# script (after the button logic runs), but because it's an st.empty() slot
+# created here, the content appears at THIS position on the page -- no
+# scrolling needed to see the result after clicking Predict.
+result_slot = st.empty()
+
+# If a prediction already exists in session_state (e.g. user tweaked an
+# input after predicting), keep showing it until they predict again.
+if "last_prediction" in st.session_state:
+    low, high = st.session_state["last_prediction"]
+    with result_slot.container():
+        st.markdown(f"""
+        <div class="result-card">
+            <div class="result-title">Estimated price range</div>
+            <div class="result-range">₹ {low:.2f} Cr &nbsp;–&nbsp; ₹ {high:.2f} Cr</div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ---------- Inputs, grouped into cards ----------
 with st.container(border=True):
@@ -108,14 +146,27 @@ if predict_clicked:
     one_df = pd.DataFrame(data, columns=columns)
 
     with st.spinner("Estimating price..."):
-        base_price = np.expm1(pipeline.predict(one_df))[0]
-        low = round(base_price - 0.22, 2)
-        high = round(base_price + 0.22, 2)
+        # Cast to native Python float right away -- numpy.float64 is what
+        # was causing the ugly "0.119999997317790..." display, because
+        # round() on a numpy float doesn't collapse binary floating-point
+        # tails the way it does on a native Python float.
+        base_price = float(np.expm1(pipeline.predict(one_df))[0])
+        low = base_price - 0.22
+        high = base_price + 0.22
 
-    st.markdown('<p class="section-label">Estimated price range</p>', unsafe_allow_html=True)
+    # Store in session_state so the result persists across reruns
+    # (e.g. if the user changes another input afterwards) and so the
+    # top-of-page placeholder logic above can pick it up.
+    st.session_state["last_prediction"] = (low, high)
 
-    m1, m2 = st.columns(2)
-    m1.metric("Lower bound", f"₹ {round(low, 2)} Cr")
-    m2.metric("Upper bound", f"₹ {round(high, 2)} Cr")
+    # Fill the placeholder reserved at the top of the page -- this is what
+    # makes the result visible immediately without scrolling.
+    with result_slot.container():
+        st.markdown(f"""
+        <div class="result-card">
+            <div class="result-title">Estimated price range</div>
+            <div class="result-range">₹ {low:.2f} Cr &nbsp;–&nbsp; ₹ {high:.2f} Cr</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.success(f"The estimated price is between **₹{round(low, 2)} Cr** and **₹{round(high, 2)} Cr**.")
+    st.toast("Price estimated!", icon="✅")
